@@ -1,1 +1,24 @@
-
+---
+- hosts: localhost
+  gather_facts: False
+  vars:
+    ini_inventory_output_default: ./ini_inventory_hosts
+  vars_prompt:
+    - name: "ini_inventory_output"
+      prompt: "output path of ini sytle inventory"
+      default: "{{ ini_inventory_output_default }}"
+      private: False
+  tasks:
+    - name: inventory file
+      local_action:
+        module: copy
+        content: |
+          {% for group in groups %}
+          {% if group != 'all' %}
+          [{{ group }}]
+          {% for host in groups[group] %} {{ host }}
+          {% endfor %}
+          {% endif %}
+          {% endfor %}
+        dest: "{{ ini_inventory_output }}"
+      run_once: True
